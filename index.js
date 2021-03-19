@@ -10,7 +10,7 @@ const participantKeyword = 'PARTICIPANTX';
 
 
 const numberOfParticipants = 2;
-const iterations = 5;
+const iterations = 50;
 const printArrays = true;
 const printAverages = true;
 
@@ -21,6 +21,23 @@ const recursionResults = { session_start: [], collect_sign: [], verify_sign: [],
 
 
 const calcAverage = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
+
+
+const standardDeviation = (values) =>{
+  var avg = calcAverage(values);
+  
+  var squareDiffs = values.map(function(value){
+    var diff = value - avg;
+    var sqrDiff = diff * diff;
+    return sqrDiff;
+  });
+  
+  var avgSquareDiff = calcAverage(squareDiffs);
+
+  var stdDev = Math.sqrt(avgSquareDiff);
+  return stdDev;
+}
+
 
 const replaceParticipantKeyword = (wholeWord, newKeyword, participantKeyword) => {
     const searchRegExp = new RegExp(participantKeyword, 'g');
@@ -116,7 +133,7 @@ const executeSingleChain = (results, steps) => {
                 if (toIterate && averageTimeAliases.includes(steps[i].alias)) {
                     const average = tmpArray.length ? calcAverage(tmpArray) : 0;
                     recursionResults[steps[i].alias].push(Math.round(average));
-                } else if (toIterate) {
+			    } else if (toIterate) {
                     recursionResults[steps[i].alias].push(...tmpArray);
                 } else {
                     if (steps[i].alias in recursionResults && Array.isArray(recursionResults[steps[i].alias])) {
@@ -220,11 +237,14 @@ const run = async () => {
         for (const [key, value] of Object.entries(recursionResults)) {
             if (Array.isArray(value)) {
                 console.log(key);
-                const tmpArray = value.map((el) => +(el * 0.001 ).toFixed(4));
+                const tmpArray = value.map((el) => +(el * 0.001 ).toFixed(6));
 
                 const average = tmpArray.length ? calcAverage(tmpArray) : 0;
                 printArrays && console.log(tmpArray);
                 printAverages && console.log('Average: ' + average.toFixed(4))
+				const stDev =  standardDeviation(tmpArray);
+				console.log("Standard deviation:" + stDev.toFixed(6));
+            
                 
             }
 
