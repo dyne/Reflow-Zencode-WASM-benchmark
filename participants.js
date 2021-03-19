@@ -71,7 +71,7 @@ export const participantSigns = {
     steps: [
         {
             // -a ${out}/credential_to_sign.json -k ${out}/verified_credential_$name.json  | jq . | tee ${out}/signature_$name.json
-            alias: 'credential_to_sign',
+            alias: 'sign_session',
             id: 'signature_PARTICIPANTX',
             zencode: `Scenario multidarkroom
         Scenario credential
