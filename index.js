@@ -7,11 +7,15 @@ import { verifier } from './verifier.js';
 import { multiSignature, verifyMultidarkroom } from './darkroom.js';
 
 const participantKeyword = 'PARTICIPANTX';
+
+
 const numberOfParticipants = 5;
 const iterations = 3;
+
+
 const averageTimeAliases = ['collect_sign'];
-const toIterateAliases = ['session_start', 'collect_sign', 'verify_sign']
-const recursionResults = { session_start: [], collect_sign: [], verify_sign: [] };
+const toIterateAliases = ['session_start', 'collect_sign', 'verify_sign', 'issuer_keygen']
+const recursionResults = { session_start: [], collect_sign: [], verify_sign: [], issuer_keygen: [] };
 
 const replaceParticipantKeyword = (wholeWord, newKeyword, participantKeyword) => {
     const searchRegExp = new RegExp(participantKeyword, 'g');

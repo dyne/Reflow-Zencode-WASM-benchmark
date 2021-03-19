@@ -2,7 +2,7 @@ export const participants = {
     steps: [
         {
             //  tee ${out}/keypair_PARTICIPANTX.json
-            alias: 'keygen',
+            alias: 'keygen_participant',
             id: `keypair_PARTICIPANTX`,
             zencode: `Scenario multidarkroom
             Scenario credential
@@ -13,7 +13,7 @@ export const participants = {
         },
         {
             // -k ${out}/keypair_${1}.json  | jq . | tee ${out}/public_key_${1}.json
-            alias: 'pubkey',
+            alias: 'pubkey_participant',
             id: `public_key_PARTICIPANTX`,
             zencode: `Scenario multidarkroom
             Given I am 'PARTICIPANTX'
@@ -24,7 +24,7 @@ export const participants = {
         },
         {
             // -k ${out}/keypair_PARTICIPANTX.json  | jq . | tee ${out}/request_PARTICIPANTX.json
-            alias: 'request',
+            alias: 'request_participant',
             id: `request_PARTICIPANTX`,
             zencode: `Scenario credential
             Given I am 'PARTICIPANTX'
@@ -51,7 +51,7 @@ export const participants = {
         },
         {
             // -k ${out}/keypair_${1}.json -a ${out}/issuer_signature_${1}.json  | jq . | tee ${out}/verified_credential_${1}.json
-            alias: 'aggregate_credential',
+            alias: 'aggregate_credential_participant',
             id: `verified_credential_PARTICIPANTX`,
             zencode: `Scenario credential
             Given I am 'PARTICIPANTX'
