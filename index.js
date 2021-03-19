@@ -10,12 +10,17 @@ const participantKeyword = 'PARTICIPANTX';
 
 
 const numberOfParticipants = 2;
-const iterations = 50;
+const iterations = 5;
+const printArrays = true;
+const printAverages = true;
 
 
 const averageTimeAliases = ['collect_sign'];
 const toIterateAliases = ['session_start', 'collect_sign', 'verify_sign', ]
 const recursionResults = { session_start: [], collect_sign: [], verify_sign: [],  };
+
+
+const calcAverage = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
 
 const replaceParticipantKeyword = (wholeWord, newKeyword, participantKeyword) => {
     const searchRegExp = new RegExp(participantKeyword, 'g');
@@ -109,7 +114,6 @@ const executeSingleChain = (results, steps) => {
                 }
 
                 if (toIterate && averageTimeAliases.includes(steps[i].alias)) {
-                    const calcAverage = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
                     const average = tmpArray.length ? calcAverage(tmpArray) : 0;
                     recursionResults[steps[i].alias].push(Math.round(average));
                 } else if (toIterate) {
@@ -216,7 +220,12 @@ const run = async () => {
         for (const [key, value] of Object.entries(recursionResults)) {
             if (Array.isArray(value)) {
                 console.log(key);
-                console.log(value);
+                const tmpArray = value.map((el) => +(el * 0.001 ).toFixed(4));
+
+                const average = tmpArray.length ? calcAverage(tmpArray) : 0;
+                printArrays && console.log(tmpArray);
+                printAverages && console.log('Average: ' + average.toFixed(4))
+                
             }
 
         }
@@ -243,6 +252,17 @@ const run = async () => {
     }
 
 }
+
+function roundTo(n, digits) {
+    if (digits === undefined) {
+      digits = 0;
+    }
+  
+    var multiplicator = Math.pow(10, digits);
+    n = parseFloat((n * multiplicator).toFixed(11));
+    var test =(Math.round(n) / multiplicator);
+    return +(test.toFixed(digits));
+  }
 
 run();
 
