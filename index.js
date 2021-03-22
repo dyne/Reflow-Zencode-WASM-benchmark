@@ -1,4 +1,3 @@
-import chain from '@dyne/zencode-chain';
 import { zencode_exec } from 'zenroom';
 import fs from 'fs';
 
@@ -10,9 +9,10 @@ const participantKeyword = 'PARTICIPANTX';
 
 
 const numberOfParticipants = 2;
-const iterations = 50;
+const iterations = 5;
 const printArrays = true;
 const printAverages = true;
+const configuration = 'debug=0';
 
 
 const averageTimeAliases = ['collect_sign'];
@@ -111,21 +111,28 @@ const executeSingleChain = (results, steps) => {
     return new Promise(async (resolve, reject) => {
         for (let i = 0; i < steps.length; i++) {
             try {
+                const conf = configuration ? JSON.parse(JSON.stringify(configuration)) : null;
                 const options = {
                     data: steps[i].data || valueFromOtherStep(steps[i].dataFromStep, results),
-                    keys: steps[i].keys || valueFromOtherStep(steps[i].keysFromStep, results)
+                    keys: steps[i].keys || valueFromOtherStep(steps[i].keysFromStep, results),
+                    conf
                 }
-
+                
                 const toIterate = toIterateAliases.includes(steps[i].alias);
                 const loops = toIterate ? iterations : 1;
                 const tmpArray = [];
 
                 let zenResult, startTime, endTimetime, totaltime;
                 for (let j = 1; j <= loops; j++) {
+                    console.log('-------------------------------------------------------------------');
+                    console.log(`Step with id ${steps[i].id} and alias ${steps[i].alias}. ${toIterate ? 'Iteration: ' + j : 'No iteration'}`);
                     startTime = Date.now();
                     zenResult = await zencode_exec(steps[i].zencode, options);
                     endTimetime = Date.now();
-                    totaltime = endTimetime - startTime
+                    totaltime = endTimetime - startTime;
+                    console.log(`Done. Execution time ${totaltime}. Ouput:`);
+                    console.log(zenResult);
+                    console.log('-------------------------------------------------------------------');
 
                     tmpArray.push(totaltime)
                 }
@@ -233,7 +240,7 @@ const run = async () => {
 
         await executeSingleChain(results, verifyMultidarkroom.steps);
 
-        console.log('Done.');
+        console.log('All Done.');
         for (const [key, value] of Object.entries(recursionResults)) {
             if (Array.isArray(value)) {
                 console.log(key);
@@ -285,140 +292,3 @@ function roundTo(n, digits) {
   }
 
 run();
-
-// executeChains(results, ...verifierArray, ...participantsArray)
-//     .then(() => {
-
-//         console.log('Done.');
-//         mergeSeveralResults('public_key_', 'public_keys', results);
-//         mergeToday(results);
-
-//         executeSingleChain(multiSignature.steps, results)
-//             .then(() => {
-//                 // console.log('Successfully executed darkroom:');
-
-
-//                 // console.log('merging issuer_public_key and multisignature');
-//                 mergeTwoResults('issuer_public_key', 'multisignature', 'credential_to_sign', results);
-//                 // console.log(results);
-//                 console.log('Executing...');
-//                 executeChains(results, ...participantsSignArray)
-//                     .then(() => {
-//                         console.log('Finished executing last chain');
-//                         console.log(results);
-//                     })
-//                     .catch((error) => {
-//                         console.log('Something went wrong with last chain..');
-//                         console.log(e);
-//                     })
-//             })
-//             .catch((e) => {
-//                 console.log('Something went wrong..');
-//                 console.log(e);
-//             })
-
-//     })
-//     .catch((e) => {
-//         console.log(e);
-//     })
-
-
-// zencode_exec(test, {data: null, keys: null})
-//     .then((result) => {
-//         console.log( result );
-//     })
-//     .catch((error) => {
-//         console.log('Error.');
-//         // throw new Error(error);
-//     });
-
-// chain.execute(participantSteps).then((r) => console.log(r)).catch((e)=> {console.log('Error occurred.'); console.log(e)});
-// console.log('Verifier results before');
-// console.log(verifier.results);
-// chain.execute(verifier.verifierSteps).then((r) => console.log(r)).catch((e)=> {console.log('Error occurred.'); console.log(e)});
-// console.log('Verifier results after');
-// console.log(verifier.results);
-
-
-
-
-
-
-
-
-// const steps_definition = {
-//     verbosity: false,
-//     steps: [
-//       {
-//         id: 'step0',
-//         zencode: `Scenario ecdh: create the keypair at user creation
-//   Given that my name is in a 'string' named 'username'
-//   When I create the keypair
-//   Then print my 'keypair'`,
-//         data: newAccount,
-//       },
-//       {
-//         id: 'step2',
-//         zencode: `Scenario 'ecdh': Publish the public key
-//   Given that my name is in a 'string' named 'username'
-//   and I have my 'keypair'
-//   Then print my 'public key' from 'keypair'
-//   Then print 'hello'`,
-//         data: newAccount,
-//         keysFromStep: 'step0',
-//       },
-//     ],
-//   };
-
-
-// function generate_participant(count) {
-//     // local name=$1
-//     // ## PARTICIPANT
-//     // cat <<EOF | zexe ${out}/keygen_${1}.zen  | jq . | tee ${out}/keypair_${1}.json
-// const keypair_ = `Scenario multidarkroom
-// Scenario credential
-// Given I am '${1}'
-// When I create the BLS key
-// and I create the credential key
-// Then print my 'keys'`
-
-//     // cat <<EOF | zexe ${out}/pubkey_${1}.zen -k ${out}/keypair_${1}.json  | jq . | tee ${out}/verifier_${1}.json
-// const verifier_ = `Scenario multidarkroom
-// Given I am '${1}'
-// and I have my 'keys'
-// When I create the BLS public key
-// Then print my 'bls public key'`
-
-
-
-//     // cat <<EOF | zexe ${out}/request_${1}.zen -k ${out}/keypair_${1}.json  | jq . | tee ${out}/request_${1}.json
-// const request_Scenario = `credential
-// Given I am '${1}'
-// and I have my 'keys'
-// When I create the credential request
-// Then print my 'credential request'`
-
-//     // ## ISSUER SIGNS
-//     // cat <<EOF | zexe ${out}/issuer_sign_${1}.zen -k ${out}/issuer_key.json -a ${out}/request_${1}.json  | jq . | tee ${out}/issuer_signature_${1}.json
-// const issuer_signature_ = `Scenario credential
-// Given I am 'The Authority'
-// and I have my 'keys'
-// and I have a 'credential request' inside '${1}'
-// when I create the credential signature
-// and I create the issuer public key
-// Then print the 'credential signature'
-// and print the 'issuer public key'`
-
-
-//     // ## PARTICIPANT AGGREGATES SIGNED CREDENTIAL
-//     // cat <<EOF | zexe ${out}/aggr_cred_${1}.zen -k ${out}/keypair_${1}.json -a ${out}/issuer_signature_${1}.json  | jq . | tee ${out}/verified_credential_${1}.json
-// const issuer_signature_ = `Scenario credential
-// Given I am '${1}'
-// and I have my 'keys'
-// and I have a 'credential signature'
-// when I create the credentials
-// then print my 'credentials'
-// and print my 'keys'`
-
-// }
-
