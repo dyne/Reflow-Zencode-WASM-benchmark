@@ -8,8 +8,8 @@ import { multiSignature, verifyMultidarkroom } from './darkroom.js';
 const participantKeyword = 'PARTICIPANTX';
 
 
-const numberOfParticipants = 2;
-const iterations = 5;
+const numberOfParticipants = 1000;
+const iterations = 50;
 const printArrays = true;
 const printAverages = true;
 const configuration = 'debug=0';
@@ -171,7 +171,9 @@ const executeSeveralChains = async (results, ...args) => {
     return new Promise(async (resolve, reject) => {
         try {
             for (let i = 0; i < args.length; i++) {
+                console.log(`************************ Executing chain ${i} / ${args.length} *********************`);
                 await executeSingleChain(results, args[i])
+                console.log('*******************************************************************');
             }
             resolve(results);
         } catch (e) {
