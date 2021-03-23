@@ -16,26 +16,26 @@ const configuration = 'debug=0';
 
 
 const averageTimeAliases = ['collect_sign'];
-const toIterateAliases = ['session_start', 'collect_sign', 'verify_sign', ]
-const recursionResults = { session_start: [], collect_sign: [], verify_sign: [],  };
+const toIterateAliases = ['session_start', 'collect_sign', 'verify_sign',]
+const recursionResults = { session_start: [], collect_sign: [], verify_sign: [], };
 
 
 const calcAverage = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
 
 
-const standardDeviation = (values) =>{
-  var avg = calcAverage(values);
-  
-  var squareDiffs = values.map(function(value){
-    var diff = value - avg;
-    var sqrDiff = diff * diff;
-    return sqrDiff;
-  });
-  
-  var avgSquareDiff = calcAverage(squareDiffs);
+const standardDeviation = (values) => {
+    var avg = calcAverage(values);
 
-  var stdDev = Math.sqrt(avgSquareDiff);
-  return stdDev;
+    var squareDiffs = values.map(function (value) {
+        var diff = value - avg;
+        var sqrDiff = diff * diff;
+        return sqrDiff;
+    });
+
+    var avgSquareDiff = calcAverage(squareDiffs);
+
+    var stdDev = Math.sqrt(avgSquareDiff);
+    return stdDev;
 }
 
 
@@ -107,7 +107,8 @@ const printme = (toPrint) => {
     console.log(toPrint);
 }
 
-const executeSingleChain = (results, steps) => {
+let checkarray;
+const executeSingleChain = (results, steps, firstStep, lastStep) => {
     return new Promise(async (resolve, reject) => {
         for (let i = 0; i < steps.length; i++) {
             try {
@@ -117,8 +118,8 @@ const executeSingleChain = (results, steps) => {
                     keys: steps[i].keys || valueFromOtherStep(steps[i].keysFromStep, results),
                     conf
                 }
-                
-                const toIterate = toIterateAliases.includes(steps[i].alias);
+
+                const toIterate = (toIterateAliases.includes(steps[i].alias) && steps[i].alias !== 'collect_sign') || (steps[i].alias === 'collect_sign' && (firstStep || lastStep));
                 const loops = toIterate ? iterations : 1;
                 const tmpArray = [];
 
@@ -137,10 +138,12 @@ const executeSingleChain = (results, steps) => {
                     tmpArray.push(totaltime)
                 }
 
-                if (toIterate && averageTimeAliases.includes(steps[i].alias)) {
-                    const average = tmpArray.length ? calcAverage(tmpArray) : 0;
-                    recursionResults[steps[i].alias].push(Math.round(average));
-			    } else if (toIterate) {
+                if (toIterate && averageTimeAliases.includes(steps[i].alias) && (firstStep || lastStep)) {
+                    const name = firstStep ? `${steps[i].alias}_First` : lastStep ? `${steps[i].alias}_Last` : steps[i].alias
+                    recursionResults[name] = [];
+                    recursionResults[name].push(...tmpArray);
+                    checkarray = tmpArray;
+                } else if (toIterate) {
                     recursionResults[steps[i].alias].push(...tmpArray);
                 } else {
                     if (steps[i].alias in recursionResults && Array.isArray(recursionResults[steps[i].alias])) {
@@ -171,8 +174,8 @@ const executeSeveralChains = async (results, ...args) => {
     return new Promise(async (resolve, reject) => {
         try {
             for (let i = 0; i < args.length; i++) {
-                console.log(`************************ Executing chain ${i} / ${args.length} *********************`);
-                await executeSingleChain(results, args[i])
+                console.log(`************************ Executing chain ${i} / ${args.length} ****`);
+                await executeSingleChain(results, args[i], i === 0, i === (args.length - 1))
                 console.log('*******************************************************************');
             }
             resolve(results);
@@ -219,6 +222,18 @@ const prettify = (obj) => {
     return newObj;
 }
 
+const displayTitle = (title) => {
+    console.log('*******************************************************************');
+    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+    console.log('^')
+    console.log('^')
+    console.log('------------- ' + title)
+    console.log('^')
+    console.log('^')
+    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+    console.log('*******************************************************************');
+}
+
 const run = async () => {
     const verifierArray = prepareSteps(verifier);
     const participantsArray = prepareSteps(participants);
@@ -227,34 +242,39 @@ const run = async () => {
 
     try {
         const results = {}
+        displayTitle('perifierArray and participantsArray Several Chains');
         await executeSeveralChains(results, ...verifierArray, ...participantsArray);
 
         mergeSeveralResults('public_key_', 'public_keys', results);
         mergeToday(results);
 
+        displayTitle('multiSignature.steps single Chain');
         await executeSingleChain(results, multiSignature.steps);
 
         mergeTwoResults('issuer_public_key', 'multisignature', 'credential_to_sign', results);
 
+        displayTitle('participantsSignArray several Chain');
         await executeSeveralChains(results, ...participantsSignArray);
 
+        displayTitle('participantMultisignatureArray several Chain');
         await executeSeveralChains(results, ...participantMultisignatureArray);
 
+        displayTitle('verifyMultidarkroom.stepsseveral Chain');
         await executeSingleChain(results, verifyMultidarkroom.steps);
 
         console.log('All Done.');
         for (const [key, value] of Object.entries(recursionResults)) {
             if (Array.isArray(value)) {
                 console.log(key);
-                const tmpArray = value.map((el) => +(el * 0.001 ).toFixed(6));
+                const tmpArray = value.map((el) => +(el * 0.001).toFixed(6));
 
                 const average = tmpArray.length ? calcAverage(tmpArray) : 0;
                 printArrays && console.log(tmpArray);
                 printAverages && console.log('Average: ' + average.toFixed(4))
-				const stDev =  standardDeviation(tmpArray);
-				console.log("Standard deviation:" + stDev.toFixed(6));
-            
-                
+                const stDev = standardDeviation(tmpArray);
+                console.log("Standard deviation:" + stDev.toFixed(6));
+
+
             }
 
         }
@@ -281,16 +301,5 @@ const run = async () => {
     }
 
 }
-
-function roundTo(n, digits) {
-    if (digits === undefined) {
-      digits = 0;
-    }
-  
-    var multiplicator = Math.pow(10, digits);
-    n = parseFloat((n * multiplicator).toFixed(11));
-    var test =(Math.round(n) / multiplicator);
-    return +(test.toFixed(digits));
-  }
 
 run();
