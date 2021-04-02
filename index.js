@@ -262,7 +262,7 @@ const run = async () => {
         displayTitle('verifyMultidarkroom.stepsseveral Chain');
         await executeSingleChain(results, verifyMultidarkroom.steps);
 
-        console.log('All Done.');
+        console.log(' \n All done, now generating the avg and stdev. \n \n ==================================================== \n \n  ');
         for (const [key, value] of Object.entries(recursionResults)) {
             if (Array.isArray(value)) {
                 console.log(key);
