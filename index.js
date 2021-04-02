@@ -8,8 +8,8 @@ import { multiSignature, verifyMultidarkroom } from './darkroom.js';
 const participantKeyword = 'PARTICIPANTX';
 
 
-const numberOfParticipants = 1000;
-const iterations = 50;
+const numberOfParticipants = 2;
+const iterations = 10
 const printArrays = true;
 const printAverages = true;
 const configuration = 'debug=0';
@@ -270,9 +270,11 @@ const run = async () => {
 
                 const average = tmpArray.length ? calcAverage(tmpArray) : 0;
                 printArrays && console.log(tmpArray);
+				console.log("\n " );
                 printAverages && console.log('Average: ' + average.toFixed(4))
                 const stDev = standardDeviation(tmpArray);
                 console.log("Standard deviation:" + stDev.toFixed(6));
+				console.log("\n ==================== \n" );
 
 
             }
