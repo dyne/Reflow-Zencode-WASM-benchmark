@@ -4,22 +4,22 @@ export const participants = {
             //  tee ${out}/keypair_PARTICIPANTX.json
             alias: 'keygen_participant',
             id: `keypair_PARTICIPANTX`,
-            zencode: `Scenario multidarkroom
+            zencode: `Scenario reflow
             Scenario credential
             Given I am 'PARTICIPANTX'
-            When I create the BLS key
+            When I create the reflow key
             and I create the credential key
-            Then print my 'keys'`
+            Then print my 'keyring'`
         },
         {
             // -k ${out}/keypair_${1}.json  | jq . | tee ${out}/public_key_${1}.json
             alias: 'pubkey_participant',
             id: `public_key_PARTICIPANTX`,
-            zencode: `Scenario multidarkroom
+            zencode: `Scenario reflow
             Given I am 'PARTICIPANTX'
-            and I have my 'keys'
-            When I create the BLS public key
-            Then print my 'bls public key'`,
+            and I have my 'keyring'
+            When I create the reflow public key
+            Then print my 'reflow public key'`,
             keysFromStep: `keypair_PARTICIPANTX`,
         },
         {
@@ -28,7 +28,7 @@ export const participants = {
             id: `request_PARTICIPANTX`,
             zencode: `Scenario credential
             Given I am 'PARTICIPANTX'
-            and I have my 'keys'
+            and I have my 'keyring'
             When I create the credential request
             Then print my 'credential request'`,
             keysFromStep: `keypair_PARTICIPANTX`,
@@ -39,7 +39,7 @@ export const participants = {
             id: `issuer_signature_PARTICIPANTX`,
             zencode: `Scenario credential
             Given I am 'The Authority'
-            and I have my 'keys'
+            and I have my 'keyring'
             and I have a 'credential request' inside 'PARTICIPANTX'
             when I create the credential signature
             and I create the issuer public key
@@ -55,11 +55,11 @@ export const participants = {
             id: `verified_credential_PARTICIPANTX`,
             zencode: `Scenario credential
             Given I am 'PARTICIPANTX'
-            and I have my 'keys'
+            and I have my 'keyring'
             and I have a 'credential signature'
             when I create the credentials
             then print my 'credentials'
-            and print my 'keys'`,
+            and print my 'keyring'`,
             keysFromStep: `keypair_PARTICIPANTX`,
             dataFromStep: `issuer_signature_PARTICIPANTX`
         }
@@ -73,15 +73,15 @@ export const participantSigns = {
             // -a ${out}/credential_to_sign.json -k ${out}/verified_credential_$name.json  | jq . | tee ${out}/signature_$name.json
             alias: 'sign_session',
             id: 'signature_PARTICIPANTX',
-            zencode: `Scenario multidarkroom
+            zencode: `Scenario reflow
         Scenario credential
         Given I am 'PARTICIPANTX'
         and I have my 'credentials'
-        and I have my 'keys'
-        and I have a 'multidarkroom session'
+        and I have my 'keyring'
+        and I have a 'reflow seal'
         and I have a 'issuer public key' from 'The Authority'
-        When I create the multidarkroom signature
-        Then print the 'multidarkroom signature'`,
+        When I create the reflow signature
+        Then print the 'reflow signature'`,
             dataFromStep: `credential_to_sign`,
             keysFromStep: `verified_credential_PARTICIPANTX`,
         }
@@ -97,17 +97,18 @@ export const participantMultisignature = {
             name: 'Participants sign the multisig',
             alias: 'collect_sign',
             id: 'multisignature',
-            zencode: `Scenario multidarkroom
-        Scenario credential
-        Given I have a 'multidarkroom session'
-        and I have a 'issuer public key' in 'The Authority'
-        and I have a 'multidarkroom signature'
-        When I aggregate all the issuer public keys
-        and I verify the multidarkroom signature credential
-        and I check the multidarkroom signature fingerprint is new
-        and I add the multidarkroom fingerprint to the multidarkroom session
-        and I add the multidarkroom signature to the multidarkroom session
-        Then print the 'multidarkroom session'`,
+            zencode: `Scenario 'reflow': add the signature to the seal
+					Given I have a 'reflow seal'
+					Given I have a 'issuer public key' in 'The Authority'
+					Given I have a 'reflow signature'
+
+					When I aggregate all the issuer public keys
+					When I verify the reflow signature credential
+
+					When I check the reflow signature fingerprint is new
+					When I add the reflow fingerprint to the reflow seal
+					When I add the reflow signature to the reflow seal
+					Then print the 'reflow seal'`,
             dataFromStep: `multisignature`,
             keysFromStep: [`issuer_public_key`, `signature_PARTICIPANTX`],
         }

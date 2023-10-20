@@ -8,7 +8,7 @@ export const verifier = {
             zencode: `Scenario credential
         Given I am 'The Authority'
         when I create the issuer key
-        Then print my 'keys'`,
+        Then print my 'keyring'`,
             data: newAccount,
         },
         {
@@ -16,7 +16,7 @@ export const verifier = {
             id: 'issuer_public_key',
             zencode: `Scenario credential: publish verifier
         Given that I am known as 'The Authority'
-        and I have my 'keys'
+        and I have my 'keyring'
         When I create the issuer public key
         Then print my 'issuer public key'`,
             data: newAccount,

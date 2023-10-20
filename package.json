@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "zenroom": "^2.2.0-d16618a"
+    "zenroom": "latest"
   },
   "type": "module"
 }

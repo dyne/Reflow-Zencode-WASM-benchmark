@@ -5,13 +5,13 @@ export const multiSignature = {
             name: 'Issuer creates the multisig',
             alias: 'session_start',
             id: 'multisignature',
-            zencode: `Scenario multidarkroom
-        Given I have a 'bls public key array' named 'public keys'
+            zencode: `Scenario reflow
+        Given I have a 'reflow public key array' named 'public keys'
         and I have a 'string' named 'today'
-        When I aggregate the bls public key from array 'public keys'
-        and I rename the 'bls public key' to 'multidarkroom public key'
-        and I create the multidarkroom session with uid 'today'
-        Then print the 'multidarkroom session'`,
+        When I aggregate the reflow public key from array 'public keys'
+		When I create the reflow identity of 'today'
+		When I create the reflow seal with identity 'reflow identity'
+        Then print the 'reflow seal'`,
             dataFromStep: `public_keys`,
             keysFromStep: `today`,
         }
@@ -25,11 +25,11 @@ export const verifyMultidarkroom = {
             name: 'Issuer verifies the signed multisig',
             alias: 'verify_sign',
             id: 'verifySignature',
-            zencode: `Scenario multidarkroom
-            Given I have a 'multidarkroom session'
-            When I verify the multidarkroom session is valid
-            Then print 'SUCCESS'
-            and print the 'multidarkroom session'`,
+            zencode: `Scenario reflow
+            Given I have a 'reflow seal'
+            When I verify the reflow seal is valid
+            Then print the string 'SUCCESS'
+            and print the 'reflow seal'`,
             dataFromStep: `multisignature`,
         },
     ]
